@@ -1,3 +1,10 @@
+---
+title: Abstract providers & interfaces
+parent: Parent
+layout: default
+nav_order: 1
+---
+
 # Abstract providers
 
 When implementing some types of services, a contradiction of sorts happens. Said service may have very clearly defined responsibilities, but when it comes to implementing a solution, we tightly couple it with a specific implementation.
