@@ -1,6 +1,6 @@
 ---
 title: Abstract providers & interfaces
-parent: Parent
+parent: Architecture
 layout: default
 nav_order: 1
 ---
