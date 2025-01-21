@@ -14,7 +14,7 @@ Defining rules for organizing projects is generally a good practice to avoid clu
 
 ## Modules
 
-Throughout the overview of the [NestJS docs](https://docs.nestjs.com/), folder structure is implicitly to be driven by _modules_.
+Throughout the overview of the [NestJS docs](https://docs.nestjs.com/), folder structure is implicitly driven by _modules_.
 
 Of course, modules are actual elements in the NestJS architecture - they incorporate various elements (controllers, providers, other modules) into a single unit, which can then be included in other parts of the application.
 
