@@ -30,7 +30,7 @@ src
 └───...
 ```
 
-Each module can be thought as an autocontained _feature_. And since modules are to be composed via inclusion, it's useful to try and organize them in a way where dependencies flow _forward_, to avoid circular dependencies (which [can be resolved](https://docs.nestjs.com/openapi/types-and-parameters#circular-dependencies), but are not ideal).
+Each module can be thought of as an autocontained _feature_. And since modules are to be composed via inclusion, it's useful to try and organize them in a way where dependencies flow _forward_, to avoid circular dependencies (which [can be resolved](https://docs.nestjs.com/openapi/types-and-parameters#circular-dependencies), but are not ideal).
 
 > 👉 By "flow forward", what we mean is that the module dependency graph is actually a Directed Acyclic Graph (DAG).
 
