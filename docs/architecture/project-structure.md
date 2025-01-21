@@ -109,7 +109,7 @@ src
         └─── ...
 ```
 
-Let's now explore what should go inside wach of these locations.
+Let's now explore what should go inside each of these locations.
 
 ### Application Layer
 
