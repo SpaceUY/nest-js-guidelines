@@ -270,4 +270,4 @@ Whether you choose to work with the simple or complex approach, following these 
 
 Of course, certain situations may require a slightly different setup - that's left to the reader's judgement.
 
-But, as a general rule of thumb, it's good to stick to this principles. Also, this is very helpful if team members have to **move from one project to another**, as they will avoid the time-consuming task of trying to understand how the code is organized, and can instead focus on the particular business logic.
+But, as a general rule of thumb, it's good to stick to these principles. Also, this is very helpful if team members have to **move from one project to another**, as they will avoid the time-consuming task of trying to understand how the code is organized, and can instead focus on the particular business logic.
