@@ -94,7 +94,7 @@ More complex projects may see parts of their infrastructure or their presentatio
 
 So, we take elements of [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design) (DDD) and the [Hexagonal Architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>) to propose this folder structure.
 
-> 💡 It's very useful to read about [abstract interfaces](./abstract-interfaces.html) in order to make the most out of this design choice.
+> 💡 It's very useful to read about [abstract interfaces](./1_abstract-interfaces.html) in order to make the most out of this design choice.
 
 Instead of being a simple container, each module is now separated into three very distinct parts:
 
@@ -242,7 +242,7 @@ Under infrastructure, we find external providers that serve purposes such as per
 
 > 💡 This is the main idea and benefit behind [hexagonal architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>).
 
-The bottom line is that data models for external providers, as well as services that interface with them live here. But the use of [adapters](./abstract-interfaces.html) is also encouraged, so that external providers and wrapping libraries can be switched and updated as the application evolves, without the need to rewrite business logic.
+The bottom line is that data models for external providers, as well as services that interface with them live here. But the use of [adapters](./1_abstract-interfaces.html) is also encouraged, so that external providers and wrapping libraries can be switched and updated as the application evolves, without the need to rewrite business logic.
 
 Thus, the standard folder structure will look like this:
 
