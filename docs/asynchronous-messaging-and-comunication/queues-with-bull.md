@@ -1,6 +1,6 @@
 ---
 title: Queue System in NestJS with Bull
-parent: Queues
+parent: Asynchronous messaging and communication
 layout: default
 nav_order: 1
 ---
@@ -13,13 +13,13 @@ Node.js is a runtime environment that operates on a single-threaded model with a
 
 This is where queue systems and asynchronous handling become fundamental, as they allow distributing the workload and preventing intensive tasks from affecting the overall performance of the application.
 
-In modern applications, there are various scenarios where we need to handle certain types of tasks in such a way that they do not affect the main flow. To address these scenarios (such as sending emails, generating certain documents, processing data, etc.), background processing strategies have been developed that allow tasks to be executed asynchronously and in a distributed manner.
+There are various scenarios where we need to handle certain types of tasks in such a way that they do not affect the main flow. To address these scenarios (such as sending emails, generating certain documents, processing data, etc.), background processing strategies have been developed that allow tasks to be executed asynchronously and in a distributed manner.
 
 In this article, we will explore how to implement a queue system using Bull and Redis in a NestJS application.
 
 ### Why Use Queues?
 
-In modern systems with variable loads and asynchronous operations, queues:
+In systems with variable loads and asynchronous operations, queues:
 
 - Prevent blocking in the Node.js main thread
 - Allow distributed processing
@@ -50,8 +50,6 @@ Bull offers advanced features for asynchronous task processing:
 ## Initial Configuration
 
 To start working with Bull, you need to have a running Redis instance and install the necessary dependencies:
-
-### Installation
 
 ```bash
 $ npm install --save @nestjs/bull bull
@@ -132,12 +130,12 @@ export class QueueProcessor {
 
 	// Listener: Job has started
 	@OnQueueActive()
-	onActive(job: Job) {
+	onActive(job: Job): void {
 		this.logger.debug(`Processing job ${job.id} of type ${job.name}`);
 	}
 
 	@Process('send-email')
-	async handleSendEmail(job: Job) {
+	async handleSendEmail(job: Job): Promise<void> {
 		this.logger.debug('Starting email send to ' + job.data.recipient);
 
 		try {
@@ -152,7 +150,7 @@ export class QueueProcessor {
 
 	// Listener: Job finished
 	@OnQueueCompleted()
-	onCompleted(job: Job) {
+	onCompleted(job: Job): void {
 		this.logger.debug(`Completed job ${job.id} of type ${job.name}`);
 	}
 }
@@ -180,8 +178,8 @@ export class QueueService {
 		subject: string;
 		body: string;
 		attachments?: any[];
-	}) {
-		return await this.emailQueue.add('send-email', data, {
+	})Promise<Job<any>>  {
+		return this.emailQueue.add('send-email', data, {
 			delay: 5000, // 5-second delay
 			attempts: 3, // 3 attempts
 			backoff: {
@@ -209,7 +207,7 @@ export class EmailController {
 	@Post('send')
 	async sendEmail(
 		@Body() body: { recipient: string; subject: string; body: string }
-	) {
+	): Promise<{ message: string }> {
 		await this.queueService.addEmailJob(body);
 		return { message: 'Email scheduled successfully' };
 	}
@@ -229,10 +227,6 @@ This type of system is used in scenarios where it is necessary to execute tasks 
 - Data synchronization between systems.
 
 ## Best Practices and Final Considerations
-
-- **Environment Variables:**
-
-  Use environment variables to configure critical parameters (such as the Redis connection).
 
 - **Error Handling:**
 
