@@ -272,3 +272,69 @@ describe('Products API (e2e)', () => {
   });
 });
 ```
+
+### Use NestJS testing utilities and Supertest
+
+NestJS has built-in testing utilities and Supertest is a popular library for testing HTTP servers. Always prefer Supertest over general HTTP clients like Axios for testing.
+
+```ts
+// ❌ Using Axios for testing
+import axios from 'axios';
+
+describe('Users API (e2e)', () => {
+  let app: INestApplication;
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+    baseUrl = `http://localhost:${process.env.PORT}`;
+  });
+
+  it('should create user', async () => {
+    const response = await axios.post(`${baseUrl}/users`, {
+      name: 'Test User',
+      email: 'test@example.com',
+    });
+    expect(response.status).toBe(201);
+    expect(response.data.name).toBe('Test User');
+  });
+});
+
+// ✅ Using Supertest for testing
+import * as request from 'supertest';
+
+describe('Users API (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('should create user', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({
+        name: 'Test User',
+        email: 'test@example.com',
+      })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.name).toBe('Test User');
+      });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+});
+```
