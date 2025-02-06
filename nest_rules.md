@@ -5,8 +5,24 @@
 - **Type Safety**
 
   - Use TypeScript across your entire application.
-  - Avoid `any` type (enable `tsconfig.json` `noImplicitAny`)
   - Leverage Nest’s decorators and TypeScript features for compile-time checks.
+  - Avoid `any` type (enable `tsconfig.json` `noImplicitAny`)
+  - If an edge case absolutely requires using `any`, you must add the following comment on the line immediately above the usage:
+
+    ```typescript
+    // ai-disable-next-line no-use-any
+    ```
+
+    This signals that the use of `any` is intentional and should be treated as an exception.
+
+    **Example**:
+
+    ```typescript
+    // ai-disable-next-line no-use-any
+    function riskyParse(input: any) {
+      // ...
+    }
+    ```
 
 - **Security**
 
@@ -17,27 +33,28 @@
 
   - Use clear, descriptive variable, method, and class names (e.g., `isActive`, `userEmail`, `handleUserLogin`).
   - DTO classes must end with Dto (e.g., `CreateUserDto`) and use camelCase for their properties.
-  
+
 - **Modular Structure**
 
   - Each module must have its own folder, containing `controller`, `service`, and relevant DTOs.
-  - Alternatively, shared DTOs can live in a global `shared/dto folder`.
+  - Alternatively, shared DTOs can live in a global `common/dto folder`.
 
 - **DTO Rules**
 
   - DTO Suffix: Each Data Transfer Object ends with Dto (e.g., `CreateUserDto`).
   - Validation: Implement `class-validator` and/or `class-transformer` for every DTO.
   - Example:
-   ```typescript
-  import { IsString, IsEmail } from 'class-validator';
 
-    export class CreateUserDto {
+  ```typescript
+  import { IsString, IsEmail } from "class-validator";
+
+  export class CreateUserDto {
     @IsString()
     username: string;
 
     @IsEmail()
     email: string;
-    }
+  }
   ```
 
 ## Project Structure & SOLID Principles
@@ -66,13 +83,13 @@
   - Magic Numbers/Strings: Avoid hardcoding values directly in your code (e.g., `statusCode = 200`, `'my-secret-key'`, `TIMEOUT = 3000`).
     - Correct Approach: Place such constants in a config file, use environment variables, or define them in an enum or constants module. For instance:
     ```typescript
-        // constants.ts
-        export const DEFAULT_TIMEOUT = 3000;
-        export const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-        export enum HttpStatusCodes {
-        OK = 200,
-        NOT_FOUND = 404,
-        }
+    // constants.ts
+    export const DEFAULT_TIMEOUT = 3000;
+    export const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+    export enum HttpStatusCodes {
+      OK = 200,
+      NOT_FOUND = 404,
+    }
     ```
 
 ## Security & Environment Management
@@ -136,6 +153,7 @@
 ## Testing & Quality Assurance
 
 - **Unit Tests**
+
   - Use Jest for unit tests.
   - Target utilities. Ensure critical business logic is covered.
 
@@ -146,6 +164,7 @@
 ## Additional Considerations
 
 - **Error Handling**
+
   - Use custom exceptions or Nest’s built-in HTTP exceptions (`HttpException`, `NotFoundException`, etc.) to provide meaningful error messages and correct status codes.
   - Provide a global exception filter if you need standardized error responses.
 
@@ -153,11 +172,11 @@
   - Provide a default endpoint (e.g., GET /) that returns a simple health/status response.
   - This allows quick verification from browsers or load balancers that the service is up and running.
     ```typescript
-       @Controller()
-        export class AppController {
-            @Get()
-            healthCheck() {
-                return { status: 'ok' };
-            }
-        }
+    @Controller()
+    export class AppController {
+      @Get()
+      healthCheck() {
+        return { status: "ok" };
+      }
+    }
     ```
