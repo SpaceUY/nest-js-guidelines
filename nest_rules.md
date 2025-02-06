@@ -54,6 +54,10 @@
 
     @IsEmail()
     email: string;
+
+    @IsString()
+    @Exclude() 
+    password: string;
   }
   ```
 
@@ -98,6 +102,7 @@
 
   - Never hardcode secrets (API keys, DB credentials, tokens) directly in code.
   - Store secrets in environment variables, using `.env` files, and ensure they’re `.gitignored`.
+  - Encrypt Sensitive DB Data: Any sensitive information (e.g., passwords, tokens) stored in the database must be hashed or encrypted. For instance, always store passwords using a secure hashing algorithm (e.g., bcrypt, Argon2), never as plain text.
 
 - **Validation**
 
@@ -166,7 +171,7 @@
 - **Error Handling**
 
   - Use custom exceptions or Nest’s built-in HTTP exceptions (`HttpException`, `NotFoundException`, etc.) to provide meaningful error messages and correct status codes.
-  - Provide a global exception filter if you need standardized error responses.
+  - Consider implementing a global or scoped `HttpExceptionFilter` (or other Exception Filters) to centralize error handling and return consistent responses.
 
 - **Default Healthcheck Controller**
   - Provide a default endpoint (e.g., GET /) that returns a simple health/status response.
