@@ -90,10 +90,9 @@
     // constants.ts
     export const DEFAULT_TIMEOUT = 3000;
     export const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
-    export enum HttpStatusCodes {
-      OK = 200,
-      NOT_FOUND = 404,
-    }
+    import {  
+      HttpStatus,
+    } from '@nestjs/common';
     ```
 
 ## Security & Environment Management
@@ -102,6 +101,7 @@
 
   - Never hardcode secrets (API keys, DB credentials, tokens) directly in code.
   - Store secrets in environment variables, using `.env` files, and ensure they’re `.gitignored`.
+  - A good approach for using this technique in Nest is to create a ConfigModule that exposes a ConfigService which loads the appropriate `.env` file. While you may choose to write such a module yourself, for convenience Nest provides the @nestjs/config package out-of-the box
   - Encrypt Sensitive DB Data: Any sensitive information (e.g., passwords, tokens) stored in the database must be hashed or encrypted. For instance, always store passwords using a secure hashing algorithm (e.g., bcrypt, Argon2), never as plain text.
 
 - **Validation**
@@ -121,7 +121,7 @@
   - Configure log levels (e.g., debug, info, error) depending on environment (`development` vs. `production`).
   - Log critical information, errors, and relevant request data. Avoid logging sensitive user data or tokens.
 
-- **Logging**
+- **Monitoring & Metrics**
 
   - Integrate @willsoto/nestjs-prometheus for Prometheus metrics.
   - Expose application metrics (e.g., request count, error count, response time) to ensure observability and easy monitoring.
@@ -145,7 +145,10 @@
     ```typescript
         @Post()
         @ApiOperation({ summary: 'Create a user' })
-        @ApiResponse({ status: 201, description: 'User created successfully' })
+        @ApiResponse({
+          status: HttpStatus.CREATED,
+          description: 'User created successfully'
+        })
         create(@Body() createUserDto: CreateUserDto) {
         return this.usersService.create(createUserDto);
         }
