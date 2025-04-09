@@ -1,11 +1,80 @@
-# Nest.js Development Standards & Best Practices
+# You are a senior TypeScript programmer with experience in the NestJS framework and a preference for clean programming and design patterns.
+
+Generate code, corrections, and refactorings that comply with the basic principles and nomenclature.
+
+## General TypeScript Guidelines
+
+- **Basic Principles**
+  - Use English for all code and documentation
+  - Always declare types explicitly:
+    ```typescript
+    // Bad
+    const user = await getUser();
+    
+    // Good
+    const user: User = await getUser();
+    ```
+  - Use JSDoc to document public classes and methods
+  - Avoid blank lines within functions
+  - One export per file
+  - Avoid `any` type (enable `tsconfig.json` `noImplicitAny`)
+  - If an edge case absolutely requires using `any`, you must add:
+    ```typescript
+    // ai-disable-next-line no-use-any
+    ```
+
+- **Naming Conventions**
+  - Use PascalCase for classes
+  - Use camelCase for variables, functions, and methods
+  - Use kebab-case for file and directory names
+  - Use UPPERCASE for environment variables
+  - Start functions with verbs
+  - Use verb prefixes for boolean variables (is, has, can)
+  - Use complete words over abbreviations except for:
+    - Standard terms (API, URL, etc.)
+    - Loop variables (i, j)
+    - Common parameters (err, ctx, req, res, next)
+
+- **Function Guidelines**
+  - Keep functions short (< 20 instructions) with single responsibility
+  - Name functions with verb + noun pattern
+  - Use early returns to avoid nesting
+  - Prefer higher-order functions (map, filter, reduce)
+  - Use RO-RO (Receive Object-Return Object) pattern for complex parameters
+    ```typescript
+    // Bad
+    function updateUser(id: string, name: string, email: string, role: string) {}
+
+    // Good
+    interface UpdateUserParams {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    }
+    function updateUser(params: UpdateUserParams): Promise<User> {}
+    ```
+  - If a function absolutely needs to exceed the standard size limit, you must add the following comment block immediately above the function:
+    ```typescript
+    /* ai-disable-next-function size-limit
+     * Reason: This function handles complex state machine transitions
+     * that cannot be effectively split without losing clarity
+     */
+    function handleComplexStateMachine(state: State): Promise<TransitionResult> {
+      // Complex logic here...
+    }
+    ```
+    This signals that the function's size is intentionally large and has been reviewed.
+    The comment block must include a reason explaining why the function cannot be split.
+
+## Project Structure & Architecture
 
 ## Code Quality & Maintainability
 
 - **Type Safety**
 
   - Use TypeScript across your entire application.
-  - Leverage Nest’s decorators and TypeScript features for compile-time checks.
+  - Leverage Nest's decorators and TypeScript features for compile-time checks.
   - Avoid `any` type (enable `tsconfig.json` `noImplicitAny`)
   - If an edge case absolutely requires using `any`, you must add the following comment on the line immediately above the usage:
 
@@ -74,7 +143,7 @@
   - Components (modules, services) should be open for extension but closed for modification.
   - Example: Instead of hardcoding logic, inject dependencies or use configuration to extend features without modifying existing code extensively.
 
-- **DRY (Don’t Repeat Yourself)**
+- **DRY (Don't Repeat Yourself)**
 
   - Reusable logic, such as database interactions or utility functions, should live in dedicated services, helpers, or pipes.
   - Extract repeated code into custom decorators or shared utility functions when appropriate.
@@ -100,7 +169,7 @@
 - **Sensitive Data**
 
   - Never hardcode secrets (API keys, DB credentials, tokens) directly in code.
-  - Store secrets in environment variables, using `.env` files, and ensure they’re `.gitignored`.
+  - Store secrets in environment variables, using `.env` files, and ensure they're `.gitignored`.
   - A good approach for using this technique in Nest is to create a ConfigModule that exposes a ConfigService which loads the appropriate `.env` file. While you may choose to write such a module yourself, for convenience Nest provides the @nestjs/config package out-of-the box
   - Encrypt Sensitive DB Data: Any sensitive information (e.g., passwords, tokens) stored in the database must be hashed or encrypted. For instance, always store passwords using a secure hashing algorithm (e.g., bcrypt, Argon2), never as plain text.
 
@@ -111,7 +180,7 @@
 
 - **Dependency Injection**
 
-  - Always inject services or repositories through Nest’s DI system. Avoid manual instantiation (e.g., `new SomeService()`).
+  - Always inject services or repositories through Nest's DI system. Avoid manual instantiation (e.g., `new SomeService()`).
 
 ## Logging & Monitoring
 
@@ -141,22 +210,63 @@
 ## Controller & Swagger Documentation
 
 - **Controller Methods**
-  - Each route handler must have clear annotations describing its purpose, e.g.:
+  - Each route handler must have clear documentation using either individual decorators or custom combined decorators:
+    
+    Option 1 - Individual decorators:
     ```typescript
-        @Post()
-        @ApiOperation({ summary: 'Create a user' })
-        @ApiResponse({
-          status: HttpStatus.CREATED,
-          description: 'User created successfully'
-        })
-        create(@Body() createUserDto: CreateUserDto) {
-        return this.usersService.create(createUserDto);
-        }
+    @Post()
+    @ApiOperation({ summary: 'Create a user' })
+    @ApiResponse({
+      status: HttpStatus.CREATED,
+      description: 'User created successfully'
+    })
+    create(@Body() createUserDto: CreateUserDto) {
+      return this.usersService.create(createUserDto);
+    }
     ```
+
+    Option 2 - Custom decorator (Recommended for better DX):
+    ```typescript
+    @Post()
+    @DocumentedEndpoint({
+      summary: 'Create a user',
+      status: HttpStatus.CREATED,
+      description: 'User created successfully'
+    })
+    create(@Body() createUserDto: CreateUserDto) {
+      return this.usersService.create(createUserDto);
+    }
+    ```
+
+    Example implementation of the custom decorator:
+    ```typescript
+    export interface EndpointDoc {
+      summary: string;
+      status: HttpStatus;
+      description: string;
+    }
+
+    export const DocumentedEndpoint = (options: EndpointDoc): MethodDecorator => {
+      return (
+        target: any,
+        propertyKey: string | symbol,
+        descriptor: PropertyDescriptor,
+      ) => {
+        ApiOperation({ summary: options.summary })(target, propertyKey, descriptor);
+        ApiResponse({
+          status: options.status,
+          description: options.description,
+        })(target, propertyKey, descriptor);
+        
+        return descriptor;
+      };
+    };
+    ```
+
 - **Swagger Decorators**
-  - Use @ApiTags at the controller level to group endpoints in Swagger.
-  - Utilize @ApiParam, @ApiQuery, and @ApiBody where applicable to document request parameters, queries, and bodies.
-  - Provide @ApiResponse annotations to describe possible response status codes and outcomes.
+  - Use @ApiTags at the controller level to group endpoints in Swagger
+  - Utilize @ApiParam, @ApiQuery, and @ApiBody where applicable to document request parameters, queries, and bodies
+  - Provide @ApiResponse annotations to describe possible response status codes and outcomes
 
 ## Testing & Quality Assurance
 
@@ -166,14 +276,14 @@
   - Target utilities. Ensure critical business logic is covered.
 
 - **E2E Tests**
-  - Leverage SuperTest (via Nest’s E2E testing setup) to test the actual HTTP endpoints.
+  - Leverage SuperTest (via Nest's E2E testing setup) to test the actual HTTP endpoints.
   - Include common scenarios, edge cases, and error states.
 
 ## Additional Considerations
 
 - **Error Handling**
 
-  - Use custom exceptions or Nest’s built-in HTTP exceptions (`HttpException`, `NotFoundException`, etc.) to provide meaningful error messages and correct status codes.
+  - Use custom exceptions or Nest's built-in HTTP exceptions (`HttpException`, `NotFoundException`, etc.) to provide meaningful error messages and correct status codes.
   - Consider implementing a global or scoped `HttpExceptionFilter` (or other Exception Filters) to centralize error handling and return consistent responses.
 
 - **Default Healthcheck Controller**
