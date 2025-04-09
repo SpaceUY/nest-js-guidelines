@@ -1,0 +1,541 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# NestJS Testing Guidelines with Jest & Supertest
+
+## 1. Core Testing Principles
+
+### 1.1 Testing Philosophy
+- Test behavior, not implementation
+- Focus on API contracts and outcomes
+- Maintain test isolation
+- Keep tests simple and maintainable
+- Follow AAA pattern (Arrange, Act, Assert)
+
+### 1.2 Test Structure
+```typescript
+// Example of ideal test structure
+describe('ServiceName', () => {
+  // Setup
+  beforeEach(async () => {
+    // Common setup code
+  });
+
+  // Cleanup
+  afterEach(async () => {
+    // Cleanup code
+  });
+
+  // Test cases
+  it('should [expected behavior]', async () => {
+    // Arrange
+    // Act
+    // Assert
+  });
+});
+```
+
+## 2. Unit Testing with Jest
+
+### 2.1 Testing Services
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
+import { PrismaService } from '../prisma/prisma.service';
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let prismaService: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: PrismaService,
+          useValue: {
+            user: {
+              findUnique: jest.fn(),
+              findMany: jest.fn(),
+              create: jest.fn(),
+            },
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+    prismaService = module.get<PrismaService>(PrismaService);
+  });
+
+  it('should find a user by id', async () => {
+    // Arrange
+    const mockUser = { id: 1, email: 'test@example.com', name: 'Test User' };
+    jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+
+    // Act
+    const result = await service.findById(1);
+
+    // Assert
+    expect(result).toEqual(mockUser);
+    expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+  });
+});
+```
+
+### 2.2 Testing Controllers
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+describe('UsersController', () => {
+  let controller: UsersController;
+  let service: UsersService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UsersController],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: {
+            findAll: jest.fn(),
+            create: jest.fn(),
+            findById: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get<UsersController>(UsersController);
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('should get user by id', async () => {
+    // Arrange
+    const mockUser = { id: 1, name: 'Test User' };
+    jest.spyOn(service, 'findById').mockResolvedValue(mockUser);
+
+    // Act
+    const result = await controller.findOne('1');
+
+    // Assert
+    expect(result).toEqual(mockUser);
+    expect(service.findById).toHaveBeenCalledWith(1);
+  });
+});
+```
+
+### 2.3 Testing Guards and Interceptors
+```typescript
+import { ExecutionContext } from '@nestjs/common';
+import { AuthGuard } from './auth.guard';
+
+describe('AuthGuard', () => {
+  let guard: AuthGuard;
+  let mockContext: ExecutionContext;
+
+  beforeEach(() => {
+    guard = new AuthGuard();
+    mockContext = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({
+          headers: {},
+        }),
+      }),
+    } as unknown as ExecutionContext;
+  });
+
+  it('should deny access when no token is provided', async () => {
+    const result = await guard.canActivate(mockContext);
+    expect(result).toBe(false);
+  });
+});
+```
+
+## 3. E2E Testing with Supertest
+
+### 3.1 Basic E2E Test Setup
+```typescript
+// test/app.e2e-spec.ts
+import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
+
+describe('AppController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    
+    // Set up global pipes, filters, etc. to match your production setup
+    app.useGlobalPipes(new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }));
+    
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('/users (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/users')
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true);
+      });
+  });
+
+  it('/users (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({ name: 'Test User', email: 'test@example.com' })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('id');
+        expect(res.body.name).toBe('Test User');
+      });
+  });
+});
+```
+
+### 3.2 Testing Authentication Flows
+```typescript
+describe('Authentication', () => {
+  it('should authenticate user and return JWT token', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'user@example.com', password: 'password123' })
+      .expect(200);
+
+    const token = loginResponse.body.token;
+    expect(token).toBeDefined();
+
+    // Test protected route with the token
+    await request(app.getHttpServer())
+      .get('/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+  });
+});
+```
+
+### 3.3 Database Testing Strategy
+```typescript
+describe('User endpoints with DB', () => {
+  beforeEach(async () => {
+    // Reset or seed test database
+    await app.get(PrismaService).user.deleteMany({});
+    await app.get(PrismaService).user.create({
+      data: {
+        email: 'test@example.com',
+        name: 'Test User',
+        password: await bcrypt.hash('password123', 10),
+      },
+    });
+  });
+
+  it('should return users from database', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/users')
+      .expect(200);
+    
+    expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body[0]).toHaveProperty('email', 'test@example.com');
+  });
+});
+```
+
+## 4. Mocking Strategies
+
+### 4.1 Mocking Services
+```typescript
+// Mock entire service
+const mockUsersService = {
+  findAll: jest.fn().mockResolvedValue([
+    { id: 1, name: 'Test User' },
+    { id: 2, name: 'Another User' },
+  ]),
+};
+
+// Mock specific method
+jest.spyOn(usersService, 'findById').mockImplementation(async (id: number) => {
+  if (id === 1) {
+    return { id: 1, name: 'Test User' };
+  }
+  throw new NotFoundException();
+});
+```
+
+### 4.2 Mocking Database Interactions
+```typescript
+// Mock Prisma methods
+const mockPrismaService = {
+  user: {
+    findMany: jest.fn().mockResolvedValue([
+      { id: 1, name: 'Test User', email: 'test@example.com' },
+    ]),
+    findUnique: jest.fn().mockImplementation(({ where }) => {
+      if (where.id === 1) {
+        return Promise.resolve({ id: 1, name: 'Test User' });
+      }
+      return Promise.resolve(null);
+    }),
+  },
+};
+```
+
+### 4.3 Avoiding Circular Mocking
+```typescript
+// BAD PRACTICE - Circular mocking
+it('should get user by id', async () => {
+  // Mocking the controller response directly - this doesn't test anything useful
+  const mockUser = { id: 1, name: 'Test User' };
+  jest.spyOn(controller, 'findOne').mockResolvedValue(mockUser);
+  
+  const result = await controller.findOne('1');
+  expect(result).toEqual(mockUser); // This will always pass
+});
+
+// GOOD PRACTICE - Mock dependencies, not the controller itself
+it('should get user by id', async () => {
+  // Mock the service that the controller depends on
+  const mockUser = { id: 1, name: 'Test User' };
+  jest.spyOn(service, 'findById').mockResolvedValue(mockUser);
+  
+  // Test that controller correctly calls service and passes result
+  const result = await controller.findOne('1');
+  expect(result).toEqual(mockUser);
+  expect(service.findById).toHaveBeenCalledWith(1);
+});
+```
+
+## 5. Testing Specific NestJS Components
+
+### 5.1 Testing Exception Filters
+```typescript
+describe('HttpExceptionFilter', () => {
+  let filter: HttpExceptionFilter;
+  
+  beforeEach(() => {
+    filter = new HttpExceptionFilter();
+  });
+  
+  it('should transform exception to desired format', () => {
+    const exception = new NotFoundException('Resource not found');
+    const mockJson = jest.fn();
+    const mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+    const mockGetResponse = jest.fn().mockReturnValue({ status: mockStatus });
+    const mockHttpArgumentsHost = jest.fn().mockReturnValue({
+      getResponse: mockGetResponse,
+      getRequest: jest.fn().mockReturnValue({
+        url: '/test',
+      }),
+    });
+    const mockArgumentsHost = {
+      switchToHttp: mockHttpArgumentsHost,
+    } as unknown as ArgumentsHost;
+    
+    filter.catch(exception, mockArgumentsHost);
+    
+    expect(mockStatus).toHaveBeenCalledWith(404);
+    expect(mockJson).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 404,
+        message: 'Resource not found',
+        path: '/test',
+      }),
+    );
+  });
+});
+```
+
+### 5.2 Testing Pipes
+```typescript
+describe('ValidationPipe', () => {
+  let target: ValidationPipe;
+  const metadata: ArgumentMetadata = {
+    type: 'body',
+    metatype: class TestDto {
+      @IsString()
+      name: string;
+    },
+    data: '',
+  };
+
+  beforeEach(() => {
+    target = new ValidationPipe();
+  });
+
+  it('should throw error when validation fails', async () => {
+    try {
+      await target.transform({ age: 25 }, metadata);
+      fail('should have thrown an error');
+    } catch (err) {
+      expect(err).toBeInstanceOf(BadRequestException);
+    }
+  });
+
+  it('should pass validation', async () => {
+    const value = await target.transform({ name: 'Test' }, metadata);
+    expect(value).toEqual({ name: 'Test' });
+  });
+});
+```
+
+## 6. Best Practices
+
+### 6.1 Test Organization
+- Keep tests close to the code they test
+- Use descriptive test names
+- Group related tests using `describe` blocks
+- Follow consistent naming conventions (e.g., `*.spec.ts` for unit tests, `*.e2e-spec.ts` for E2E tests)
+
+### 6.2 Test Quality
+- Test one thing at a time
+- Avoid testing implementation details
+- Use meaningful assertions
+- Keep tests independent
+- Clean up after tests
+- Test both success and error scenarios
+
+### 6.3 Testing Performance
+- Mock expensive operations
+- Use `jest.useFakeTimers()` for time-dependent tests
+- Optimize database interactions in tests
+- Clean up resources in `afterEach` or `afterAll`
+
+## 7. Configuration
+
+### 7.1 Jest Config
+```javascript
+// jest.config.js
+module.exports = {
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: '.',
+  testRegex: '.*\\.spec\\.ts$',
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  collectCoverageFrom: ['**/*.(t|j)s'],
+  coverageDirectory: './coverage',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src/'],
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/src/$1',
+  },
+};
+```
+
+### 7.2 E2E Test Config
+```javascript
+// test/jest-e2e.config.js
+module.exports = {
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: '.',
+  testEnvironment: 'node',
+  testRegex: '.e2e-spec.ts$',
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/src/$1',
+  },
+};
+```
+
+### 7.3 Test Scripts
+```json
+{
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  }
+}
+```
+
+## 8. Common Pitfalls to Avoid
+
+- Over-mocking
+- Testing implementation details
+- Not cleaning up after tests
+- Not considering database state
+- Testing third-party libraries
+- Not testing error cases
+- Writing flaky tests
+- Circular mocking: Don't mock the same response you're evaluating. If you're testing a controller, don't mock its own methods; instead, mock the services it depends on.
+
+## 9. Debugging Tests
+
+### 9.1 Using Node Inspector
+```bash
+npm run test:debug
+```
+
+### 9.2 Debugging Tips
+- Use `console.log` strategically
+- Enable verbose logging in Jest with `--verbose`
+- Investigate one failing test at a time with `.only`
+- Check test coverage reports
+- Run tests in band (serially) with `--runInBand` when debugging
+
+## 10. Testing Database Interactions
+
+### 10.1 Test Database Approach
+- Use a separate test database
+- Reset database state before/after tests
+- Use transactions for test isolation
+- Consider in-memory databases for unit tests
+- Use database mocking for unit tests
+
+### 10.2 Prisma Test Setup
+```typescript
+// Global setup for Prisma tests
+const prisma = new PrismaClient();
+
+beforeAll(async () => {
+  // Clean database before all tests
+  await prisma.$transaction([
+    prisma.user.deleteMany(),
+    // Clean other tables as needed
+  ]);
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
+
+beforeEach(async () => {
+  // Seed with test data before each test
+  await prisma.user.create({
+    data: {
+      email: 'test@example.com',
+      name: 'Test User',
+    },
+  });
+});
+```
+
+## 11. Resources
+
+- [NestJS Testing Documentation](https://docs.nestjs.com/fundamentals/testing)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [Supertest Documentation](https://github.com/visionmedia/supertest)
+- [Prisma Testing Best Practices](https://www.prisma.io/docs/guides/testing/integration-testing) 
