@@ -116,7 +116,7 @@ export default $config({
   },
   async run() {
     const environment = $app.stage;
-    const projectName = 'spotlink';
+    const projectName = 'project-name';
 
     // VPC
     const vpcName = `vpc`;
