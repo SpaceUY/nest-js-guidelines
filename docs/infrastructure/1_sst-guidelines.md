@@ -213,11 +213,11 @@ export default $config({
       loadBalancer: {
         // domain: "example.com",
         ports: [
-          { listen: '80/http', forward: '3000/http' },
-          // { listen: '443/https', forward: '3000/http' }, // If the project is configured with Route53 using a custom domain and has an SSL certificate, it is correct to send this option, also providing the domain.
+          { listen: '80/http', forward: '5000/http' },
+          // { listen: '443/https', forward: '5000/http' }, // If the project is configured with Route53 using a custom domain and has an SSL certificate, it is correct to send this option, also providing the domain.
         ],
         health: {
-          '3000/http': {
+          '5000/http': {
             path: '/health',
             interval: '30 seconds',
             timeout: '5 seconds',
