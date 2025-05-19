@@ -13,6 +13,8 @@ This guide outlines the use of [SST](https://sst.dev/) with the goal of explaini
 
 - AWS Account: You must have access to an AWS account, preferably with Admin permissions.
 
+- Docker Desktop: You must have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+
 - IAM user should be configured with the necessary permissions to create secret keys.
 
 - Windows:
