@@ -458,6 +458,9 @@ If you need to sync the AWS resources with your local machine due to some error,
 ```bash
  npx sst refresh --stage staging
 ```
+## SST Support
+
+If at any point in the process you need support from SST, you can contact them through this Discord [link](https://discord.com/invite/sst).
 
 ## Finally
 
