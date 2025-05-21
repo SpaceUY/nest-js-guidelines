@@ -101,16 +101,23 @@ Use [AWS RDS Postgres](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CH
 ```ts
 /// <reference path="./.sst/platform/config.d.ts" />
 
+
 export enum StageEnum {
   PROD = 'production',
   TEST = 'staging',
+}
+
+enum NodeEnvEnum {
+  DEV = 'DEV',
+  TEST = 'TEST',
+  PROD = 'PROD',
 }
 
 export default $config({
   app(input) {
     const stage = input?.stage as StageEnum;
     return {
-      name: 'project-name-backend',
+      name: 'spotlink-backend',
       removal: stage === StageEnum.PROD ? 'retain' : 'remove',
       protect: ['production'].includes(input?.stage),
       home: 'aws',
@@ -118,8 +125,8 @@ export default $config({
   },
   async run() {
     const environment = $app.stage;
-    const projectName = 'project-name';
-
+    const projectName = 'spotlink';
+    const isFromLocalMachine = process.env.NODE_ENV === NodeEnvEnum.DEV || process.env.NODE_ENV === NodeEnvEnum.TEST || process.env.NODE_ENV === NodeEnvEnum.PROD;
     // VPC
     const vpcName = `vpc`;
     const vpc = new sst.aws.Vpc(vpcName, { bastion: true });
@@ -128,11 +135,6 @@ export default $config({
     const rdsName = `rds`;
     const rds = new sst.aws.Postgres(rdsName, {
       vpc,
-      username: `${projectName}Admin`,
-      password:
-        environment === StageEnum.PROD
-          ? process.env.DATABASE_PASSWORD_PRODUCTION
-          : process.env.DATABASE_PASSWORD_STAGING,
     });
     const DATABASE_URL = rds.username.apply(username =>
       rds.password.apply(password =>
@@ -150,37 +152,29 @@ export default $config({
     const secretManagerName = `${projectName}--${environment}--secrets-manager`;
     const secret = new aws.secretsmanager.Secret(secretManagerName);
 
-    // SECRET VERSION
-    const secretVersionName = `${projectName}--${environment}--secret-version`;
-    const secretVersion = new aws.secretsmanager.SecretVersion(secretVersionName, {
-      secretId: secret.id.apply(id =>id),
-      secretString: DATABASE_URL.apply(databaseUrl => JSON.stringify({
-        DATABASE_URL: databaseUrl,
-        SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
-        NODE_ENV: process.env.NODE_ENV,
-        EMAIL_FROM: process.env.EMAIL_FROM,
-        PORT: process.env.PORT,
-        JWT_SECRET: process.env.JWT_SECRET,
-        JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
-        JWT_SECRET_ADMIN: process.env.JWT_SECRET_ADMIN,
-        JWT_EXPIRES_IN_ADMIN: process.env.JWT_EXPIRES_IN_ADMIN,
-        JWT_RESET_PASSWORD_SECRET: process.env.JWT_RESET_PASSWORD_SECRET,
-        JWT_RESET_PASSWORD_EXPIRES_IN: process.env.JWT_RESET_PASSWORD_EXPIRES_IN,
-        AWS_REGION: process.env.AWS_REGION,
-        SWAGGER_USER: process.env.SWAGGER_USER,
-        SWAGGER_PASSWORD: process.env.SWAGGER_PASSWORD,
-        FRONTEND_URL: process.env.FRONTEND_URL,
-        BACKOFFICE_FRONTEND_URL: process.env.BACKOFFICE_FRONTEND_URL,
-      })),
-    });
+    if(isFromLocalMachine) { // Only run in first deploy
+      // SECRET VERSION
+      const secretVersionName = `${projectName}--${environment}--secret-version`;
+      const secretVersion = new aws.secretsmanager.SecretVersion(secretVersionName, {
+        secretId: secret.id.apply(id =>id),
+        secretString: DATABASE_URL.apply(databaseUrl => JSON.stringify({
+          DATABASE_URL: databaseUrl,
+          SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+          NODE_ENV: process.env.NODE_ENV,
+          EMAIL_FROM: process.env.EMAIL_FROM,
+          PORT: process.env.PORT,
+        })),
+      });
+    }
 
     // ECS
     const clusterName = `ecs-cluster`;
     const cluster = new sst.aws.Cluster(clusterName, { vpc });
-    console.log('Cluster', cluster);
 
     const serviceName = `${projectName}-backend-${environment}-ecs-service`;
+    const imageUri = process.env.IMAGE_URI; // Get the image uri generated in Bitbucket Pipelines
     const service = new sst.aws.Service(serviceName, {
+      ...(isFromLocalMachine ? {} : { image: imageUri }),
       cluster,
       link: [rds, secret], // Associate secret manager and rds 
       permissions: [
@@ -200,28 +194,17 @@ export default $config({
         NODE_ENV: secret.arn.apply(arn => `${arn}:NODE_ENV::`),
         EMAIL_FROM: secret.arn.apply(arn => `${arn}:EMAIL_FROM::`),
         PORT: secret.arn.apply(arn => `${arn}:PORT::`),
-        JWT_SECRET: secret.arn.apply(arn => `${arn}:JWT_SECRET::`),
-        JWT_EXPIRES_IN: secret.arn.apply(arn => `${arn}:JWT_EXPIRES_IN::`),
-        JWT_SECRET_ADMIN: secret.arn.apply(arn => `${arn}:JWT_SECRET_ADMIN::`),
-        JWT_EXPIRES_IN_ADMIN: secret.arn.apply(arn => `${arn}:JWT_EXPIRES_IN_ADMIN::`),
-        JWT_RESET_PASSWORD_SECRET: secret.arn.apply(arn => `${arn}:JWT_RESET_PASSWORD_SECRET::`),
-        JWT_RESET_PASSWORD_EXPIRES_IN: secret.arn.apply(arn => `${arn}:JWT_RESET_PASSWORD_EXPIRES_IN::`),
-        AWS_REGION: secret.arn.apply(arn => `${arn}:AWS_REGION::`),
-        SWAGGER_USER: secret.arn.apply(arn => `${arn}:SWAGGER_USER::`),
-        SWAGGER_PASSWORD: secret.arn.apply(arn => `${arn}:SWAGGER_PASSWORD::`),
-        FRONTEND_URL: secret.arn.apply(arn => `${arn}:FRONTEND_URL::`),
-        BACKOFFICE_FRONTEND_URL: secret.arn.apply(arn => `${arn}:BACKOFFICE_FRONTEND_URL::`),
       },
       loadBalancer: {
         // domain: "example.com",
         ports: [
           { listen: '80/http', forward: '5000/http' },
-          // { listen: '443/https', forward: '5000/http' }, // If the project is configured with Route53 using a custom domain and has an SSL certificate, it is correct to send this option, also providing the domain.
+          // { listen: '443/https', forward: '3000/http' }, // If the project is configured with Route53 using a custom domain and has an SSL certificate, it is correct to send this option, also providing the domain.
         ],
         health: {
           '5000/http': {
             path: '/health',
-            interval: '30 seconds',
+            interval: '60 seconds',
             timeout: '5 seconds',
           },
         },
@@ -283,7 +266,7 @@ Add the bitbucket-pipelines.yml file in the root directory of the project.
 
 Below is a sample file as a guide, but it may vary depending on the project:
 
-### Bitbucket Pipelines with pnpm
+### Frontend Bitbucket Pipelines with pnpm
 
 ```yml
 image: node:22.14.0
@@ -296,12 +279,12 @@ pipelines:
   branches:
     master:
       - step:
-          name: SST Deploy to AWS
+          name: SST Deploy to AWS Production
           size: 2x
           caches:
             - node
             - pnpm
-          deployment: production
+          deployment: Production
           script:
             - echo "Deploying to stage production"
             - corepack enable
@@ -313,12 +296,12 @@ pipelines:
 
     staging:
       - step:
-          name: SST Deploy to AWS
+          name: SST Deploy to AWS Staging
           size: 2x
           caches:
             - node
             - pnpm
-          deployment: staging
+          deployment: Staging
           script:
             - echo "Deploying to stage staging"
             - corepack enable
@@ -343,7 +326,7 @@ pipelines:
 
 ```
 
-### Bitbucket Pipelines with npm
+### Backend Bitbucket Pipelines with npm
 
 ```yml
 image: node:22.15.0
@@ -353,29 +336,108 @@ pipelines:
   branches:
     master:
       - step:
-          name: SST Deploy to AWS
+          image: node:alpine
+          name: Backend build/publish docker to ECR
           size: 2x
           caches:
             - node
-          deployment: production
-          script:
-            - echo "Deploying to stage production"
-            - npm run deploy:production
+          deployment: Production
           services:
             - docker
+          script:
+            # Creating environment variables
+            - echo "AWS_ACCOUNT_ID is:"" ${AWS_ACCOUNT_ID}
+            - echo "AWS_REGION is:"" ${AWS_REGION}
+            - export ECR_NAME="sst-asset"
+            - export IMAGE_TAG="$BITBUCKET_BUILD_NUMBER"
+            - export IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}"
+            # Install envsubst
+            - apk update && apk add gettext
+            # Set the name of the docker image we will be building.
+            - export IMAGE_NAME="${ECR_NAME}"
+            # Build the docker image
+            - docker build -t "${IMAGE_NAME}" .
+            # Save to env
+            - echo "IMAGE_URI=$IMAGE_URI" > .env
+            # Push to ECR
+            - pipe: atlassian/aws-ecr-push-image:1.5.0
+              variables:
+                IMAGE_NAME: $IMAGE_NAME
+                TAGS: $BITBUCKET_BUILD_NUMBER
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: $AWS_REGION
+          artifacts:
+            - .env 
+
+      - step:
+          name: Deploy SST Production
+          image: node:22.15.0
+          size: 2x
+          caches:
+            - node
+          services:
+            - docker
+          script:
+            - echo "Deploying to stage production"
+            # Restore variable IMAGE_URI
+            - source .env
+            # Execute deploy
+            - echo "Deploying image:" $IMAGE_URI
+            - npm run deploy:production
 
     staging:
       - step:
-          name: SST Deploy to AWS
+          image: node:alpine
+          name: Backend build/publish docker to ECR
           size: 2x
           caches:
             - node
-          deployment: staging
-          script:
-            - echo "Deploying to stage staging"
-            - npm run deploy:staging
+          deployment: Staging
           services:
             - docker
+          script:
+            # Creating environment variables
+            - echo "AWS_ACCOUNT_ID is:"" ${AWS_ACCOUNT_ID}
+            - echo "AWS_REGION is:"" ${AWS_REGION}
+            - export ECR_NAME="sst-asset"
+            - export IMAGE_TAG="$BITBUCKET_BUILD_NUMBER"
+            - export IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}"
+            # Install envsubst
+            - apk update && apk add gettext
+            # Set the name of the docker image we will be building.
+            - export IMAGE_NAME="${ECR_NAME}"
+            # Build the docker image
+            - docker build -t "${IMAGE_NAME}" .
+            # Save to env
+            - echo "IMAGE_URI=$IMAGE_URI" > .env
+            # Push to ECR
+            - pipe: atlassian/aws-ecr-push-image:1.5.0
+              variables:
+                IMAGE_NAME: $IMAGE_NAME
+                TAGS: $BITBUCKET_BUILD_NUMBER
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: $AWS_REGION
+          artifacts:
+            - .env 
+
+      - step:
+          name: Deploy SST Staging
+          image: node:22.15.0
+          size: 2x
+          caches:
+            - node
+          services:
+            - docker
+          script:
+            - echo "Deploying to stage staging"
+            # Restore variable IMAGE_URI
+            - source .env
+            # Execute deploy
+            - echo "Deploying image:" $IMAGE_URI
+            - npm run deploy:staging
+
 
   pull-requests:
     '**':
@@ -390,7 +452,7 @@ pipelines:
 
 ```
 
-## Configure Dockerfile (only for backend)
+## Configure Backend Dockerfile
 
 It is necessary to add a Dockerfile in the root of the backend project. Below is a sample Dockerfile as a guide, but it may vary depending on the project:
 
