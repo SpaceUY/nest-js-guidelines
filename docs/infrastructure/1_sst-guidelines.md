@@ -178,6 +178,7 @@ export default $config({
     const secret = new aws.secretsmanager.Secret(secretManagerName);
 
     if(isFromLocalMachine) { // For practicality, run this code only during the first deploy from your local machine with the updated variables in your local .env file. Then, for future deploys from the Bitbucket pipeline, manually configure the required secrets in AWS Secrets Manager for each environment.
+      
       // SECRET VERSION
       const secretVersionName = `${projectName}--${environment}--secret-version`;
       const secretVersion = new aws.secretsmanager.SecretVersion(secretVersionName, {
