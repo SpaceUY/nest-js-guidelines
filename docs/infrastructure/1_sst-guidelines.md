@@ -9,9 +9,9 @@ nav_order: 1
 
 This guide outlines the use of [SST](https://sst.dev/) with the goal of explaining how to deploy a NestJS backend and a React frontend on AWS using SST.
 
-In the examples, the backend is configured using Prisma ORM and PostgreSQL as the database. 
-The frontend is using Vite. 
-As a code management platform, Bitbucket is being used.
+In the examples, the backend is configured using Prisma ORM and PostgreSQL as the database.  
+The frontend is using Vite.  
+As a code management platform, Bitbucket is being used.  
 
 If you're using other tools, you can use the guide document but make some modifications to the process according to your project's stack.
 
@@ -53,13 +53,13 @@ If you're using other tools, you can use the guide document but make some modifi
 
   **Backend** (If you have a domain):
 
-  API_DOMAIN: example: test.api.projectname.com
-  API_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager
+  API_DOMAIN: example: test.api.projectname.com  
+  API_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager  
 
   **Frontend** (If you have a domain):
 
-  VITE_DOMAIN: example: test.app.projectname.com
-  VITE_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager
+  VITE_DOMAIN: example: test.app.projectname.com  
+  VITE_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager  
 
   Configure these variables in each environment you have in the Deployments section of Bitbucket.
 
