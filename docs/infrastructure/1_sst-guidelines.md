@@ -9,7 +9,9 @@ nav_order: 1
 
 This guide outlines the use of [SST](https://sst.dev/) with the goal of explaining how to deploy a NestJS backend and a React frontend on AWS using SST.
 
-In the examples, the backend is configured using Prisma ORM and PostgreSQL as the database, and the frontend is using Vite.
+In the examples, the backend is configured using Prisma ORM and PostgreSQL as the database. 
+The frontend is using Vite. 
+As a code management platform, Bitbucket is being used.
 
 If you're using other tools, you can use the guide document but make some modifications to the process according to your project's stack.
 
