@@ -9,6 +9,10 @@ nav_order: 1
 
 This guide outlines the use of [SST](https://sst.dev/) with the goal of explaining how to deploy a NestJS backend and a React frontend on AWS using SST.
 
+In the examples, the backend is configured using Prisma ORM and PostgreSQL as the database, and the frontend is using Vite.
+
+If you're using other tools, you can use the guide document but make some modifications to the process according to your project's stack.
+
 ## Requirements
 
 - **AWS Account**: You must have access to an AWS account, preferably with Admin permissions.
@@ -252,10 +256,10 @@ export default $config({
         },
         rules: [
           { listen: "80/http", redirect: "443/https" },
-          { listen: "443/https", forward: "5000/http" }
+          { listen: "443/https", forward: "5000/http" } // If your backend is running on a port other than 5000, modify this line with your backend port.
         ],
         health: {
-          '5000/http': {
+          '5000/http': { // If your backend is running on a port other than 5000, modify this line with your backend port.
             path: '/health',
             interval: '60 seconds',
             timeout: '5 seconds',
@@ -546,6 +550,12 @@ RUN chmod 777 ./docker-script.sh
 # Start the server using the production build
 CMD ./docker-script.sh
 
+```
+
+docker-script.sh using Prisma
+```sh
+npx prisma migrate deploy
+dumb-init node ./dist/main.js
 ```
 
 ## SST Deploy
