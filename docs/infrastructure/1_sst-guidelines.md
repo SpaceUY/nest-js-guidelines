@@ -11,26 +11,51 @@ This guide outlines the use of [SST](https://sst.dev/) with the goal of explaini
 
 ## Requirements
 
-- AWS Account: You must have access to an AWS account, preferably with Admin permissions.
+- **AWS Account**: You must have access to an AWS account, preferably with Admin permissions.
 
-- Docker Desktop: You must have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+- **Docker Desktop**: You must have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
 
-- IAM user should be configured with the necessary permissions to create secret keys.
+- **IAM user** should be configured with the necessary permissions to create secret keys.
 
-- Windows:
+- **Windows**:
   If using Windows, you need to install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
   Throughout the entire process, commands must be run within the WSL environment.
 
-- Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- **Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)**
 
-- Repository Variables: 
-  If you are using Bitbucket Pipelines, you need to configure the repository variables. Go to Repository variables in Bitbucket and set up the following variables with the secret checkbox enabled:
+- **Domain and SSL Certificate**: Verify with the client and the assigned Project Manager the domain to be used. If applicable, manage it through Space, purchase a domain for the project in Route 53, and add the domain and any required subdomains.
+  Example:
+  *.projectname.com
+  test.api.projectname.com
+  test.admin.projectname.com
+  test.app.projectname.com
+
+  If the client already owns a domain, check where it's hosted. If it's hosted in [AWS Route 53](https://aws.amazon.com/route53/), continue with the process. If it's not in Route 53, it's recommended to configure it in Route 53 to gain access to the domain's DNS. To do this, you'll need to contact the client and ask them to add a list of nameservers in the provider where the domain is currently hosted.
+
+  Make sure to have an approved SSL certificate in [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) associated with the declared domains.
+
+  > 💡 TIP: If the domain is not yet confirmed, this step can be skipped and configured later. Simply do not include the domain and HTTPS configurations in the sst.config.ts file.
+
+- **Bitbucket Deployment Variables:** 
+  If you are using Bitbucket Pipelines, you need to configure the repository deployments variables. Go to Deployments => Config => Variables in Bitbucket and set up the following variables with the secret checkbox enabled:
+
+  **Frontend & Backend:**
 
   AWS_ACCESS_KEY_ID  
   AWS_SECRET_ACCESS_KEY  
   AWS_REGION  
 
-In this example, neither Route53 nor SSL certificates are configured. These can be set up manually after finishing the process. (If anyone tries it and it works, please include information about it in this guidelines.)
+  **Backend** (If you have a domain):
+
+  API_DOMAIN: example: test.api.projectname.com
+  API_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager
+
+  **Frontend** (If you have a domain):
+
+  VITE_DOMAIN: example: test.app.projectname.com
+  VITE_DOMAIN_CERT_ARN: ARN from certificate in AWS Certificate Manager
+
+  Configure these variables in each environment you have in the Deployments section of Bitbucket.
 
 ## Recommendations for the process
 
@@ -42,7 +67,7 @@ In this example, neither Route53 nor SSL certificates are configured. These can 
 
 > 💡 TIP: [SST console](https://sst.dev/docs/console/): SST offers an interface to view the resources; this step is optional.
 
-> 🚨 **WARNING**: In this process, **DON'T manually add or delete resources from the AWS console** to avoid losing the SST state.
+> 🚨🚨🚨 **WARNING**: In this process, **DON'T manually delete resources from the AWS console** to avoid losing the SST state.
 
 ## Init SST
 
@@ -141,7 +166,7 @@ export default $config({
         rds.host.apply(host =>
           rds.port.apply(port =>
             rds.database.apply(database => 
-              `postgresql://${username}:${password}@${host}:${port}/${database}`
+              `postgresql://${username}:${encodeURIComponent(password).replace(/!/g, '%21')}@${host}:${port}/${database}`
             )
           )
         )
@@ -152,7 +177,7 @@ export default $config({
     const secretManagerName = `${projectName}--${environment}--secrets-manager`;
     const secret = new aws.secretsmanager.Secret(secretManagerName);
 
-    if(isFromLocalMachine) { // Only run in first deploy
+    if(isFromLocalMachine) { // For practicality, run this code only during the first deploy from your local machine with the updated variables in your local .env file. Then, for future deploys from the Bitbucket pipeline, manually configure the required secrets in AWS Secrets Manager for each environment.
       // SECRET VERSION
       const secretVersionName = `${projectName}--${environment}--secret-version`;
       const secretVersion = new aws.secretsmanager.SecretVersion(secretVersionName, {
@@ -163,6 +188,17 @@ export default $config({
           NODE_ENV: process.env.NODE_ENV,
           EMAIL_FROM: process.env.EMAIL_FROM,
           PORT: process.env.PORT,
+          JWT_SECRET: process.env.JWT_SECRET,
+          JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+          JWT_SECRET_ADMIN: process.env.JWT_SECRET_ADMIN,
+          JWT_EXPIRES_IN_ADMIN: process.env.JWT_EXPIRES_IN_ADMIN,
+          JWT_RESET_PASSWORD_SECRET: process.env.JWT_RESET_PASSWORD_SECRET,
+          JWT_RESET_PASSWORD_EXPIRES_IN: process.env.JWT_RESET_PASSWORD_EXPIRES_IN,
+          AWS_REGION: process.env.AWS_REGION,
+          SWAGGER_USER: process.env.SWAGGER_USER,
+          SWAGGER_PASSWORD: process.env.SWAGGER_PASSWORD,
+          FRONTEND_URL: process.env.FRONTEND_URL,
+          BACKOFFICE_FRONTEND_URL: process.env.BACKOFFICE_FRONTEND_URL,
         })),
       });
     }
@@ -194,12 +230,28 @@ export default $config({
         NODE_ENV: secret.arn.apply(arn => `${arn}:NODE_ENV::`),
         EMAIL_FROM: secret.arn.apply(arn => `${arn}:EMAIL_FROM::`),
         PORT: secret.arn.apply(arn => `${arn}:PORT::`),
+        JWT_SECRET: secret.arn.apply(arn => `${arn}:JWT_SECRET::`),
+        JWT_EXPIRES_IN: secret.arn.apply(arn => `${arn}:JWT_EXPIRES_IN::`),
+        JWT_SECRET_ADMIN: secret.arn.apply(arn => `${arn}:JWT_SECRET_ADMIN::`),
+        JWT_EXPIRES_IN_ADMIN: secret.arn.apply(arn => `${arn}:JWT_EXPIRES_IN_ADMIN::`),
+        JWT_RESET_PASSWORD_SECRET: secret.arn.apply(arn => `${arn}:JWT_RESET_PASSWORD_SECRET::`),
+        JWT_RESET_PASSWORD_EXPIRES_IN: secret.arn.apply(arn => `${arn}:JWT_RESET_PASSWORD_EXPIRES_IN::`),
+        AWS_REGION: secret.arn.apply(arn => `${arn}:AWS_REGION::`),
+        SWAGGER_USER: secret.arn.apply(arn => `${arn}:SWAGGER_USER::`),
+        SWAGGER_PASSWORD: secret.arn.apply(arn => `${arn}:SWAGGER_PASSWORD::`),
+        FRONTEND_URL: secret.arn.apply(arn => `${arn}:FRONTEND_URL::`),
+        BACKOFFICE_FRONTEND_URL: secret.arn.apply(arn => `${arn}:BACKOFFICE_FRONTEND_URL::`),
+        FIRST_SUPER_ADMIN_PASSWORD: secret.arn.apply(arn => `${arn}:FIRST_SUPER_ADMIN_PASSWORD::`),
+        FIRST_SUPER_ADMIN_EMAIL: secret.arn.apply(arn => `${arn}:FIRST_SUPER_ADMIN_EMAIL::`),
       },
       loadBalancer: {
-        // domain: "example.com",
-        ports: [
-          { listen: '80/http', forward: '5000/http' },
-          // { listen: '443/https', forward: '3000/http' }, // If the project is configured with Route53 using a custom domain and has an SSL certificate, it is correct to send this option, also providing the domain.
+        domain: {
+          name: process.env.API_DOMAIN!,
+          cert: process.env.API_DOMAIN_CERT_ARN!
+        },
+        rules: [
+          { listen: "80/http", redirect: "443/https" },
+          { listen: "443/https", forward: "5000/http" }
         ],
         health: {
           '5000/http': {
@@ -232,20 +284,21 @@ Use [S3](https://aws.amazon.com/s3/) together with [Cloudfront](https://aws.amaz
 export default $config({
   app(input) {
     return {
-      name: "project-name-frontend",
+      name: "spotlink-frontend",
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
     };
   },
   async run() {
-    const environment = $app.stage;
-    const projectName = 'project-name';
-
-    const staticName = `${projectName}-${environment}`;
+    const staticName = 'static-site';
     const staticSite = new sst.aws.StaticSite(staticName, {
+      domain: {
+        name: process.env.VITE_DOMAIN!,
+        cert: process.env.VITE_DOMAIN_CERT_ARN!,
+      },
       environment: {
-        VITE_API_BASE_URL: process.env.VITE_API_BASE_URL
+        VITE_API_BASE_URL: process.env.VITE_API_BASE_URL!
       },
       build: {
         command: "pnpm run build",
@@ -255,6 +308,7 @@ export default $config({
     staticSite.url.apply(url => console.log('STATIC_SITE_URL', `${url}`));
   },
 });
+
 ```
 In the output STATIC_SITE_URL, you will be able to get access to the Frontend URL on CloudFront.
 
@@ -346,8 +400,6 @@ pipelines:
             - docker
           script:
             # Creating environment variables
-            - echo "AWS_ACCOUNT_ID is:"" ${AWS_ACCOUNT_ID}
-            - echo "AWS_REGION is:"" ${AWS_REGION}
             - export ECR_NAME="sst-asset"
             - export IMAGE_TAG="$BITBUCKET_BUILD_NUMBER"
             - export IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}"
@@ -359,6 +411,8 @@ pipelines:
             - docker build -t "${IMAGE_NAME}" .
             # Save to env
             - echo "IMAGE_URI=$IMAGE_URI" > .env
+            - echo "API_DOMAIN=$API_DOMAIN" >> .env
+            - echo "API_DOMAIN_CERT_ARN=$API_DOMAIN_CERT_ARN" >> .env
             # Push to ECR
             - pipe: atlassian/aws-ecr-push-image:1.5.0
               variables:
@@ -380,7 +434,7 @@ pipelines:
             - docker
           script:
             - echo "Deploying to stage production"
-            # Restore variable IMAGE_URI
+            # Restore env variables
             - source .env
             # Execute deploy
             - echo "Deploying image:" $IMAGE_URI
@@ -398,8 +452,6 @@ pipelines:
             - docker
           script:
             # Creating environment variables
-            - echo "AWS_ACCOUNT_ID is:"" ${AWS_ACCOUNT_ID}
-            - echo "AWS_REGION is:"" ${AWS_REGION}
             - export ECR_NAME="sst-asset"
             - export IMAGE_TAG="$BITBUCKET_BUILD_NUMBER"
             - export IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_NAME}:${IMAGE_TAG}"
@@ -411,6 +463,8 @@ pipelines:
             - docker build -t "${IMAGE_NAME}" .
             # Save to env
             - echo "IMAGE_URI=$IMAGE_URI" > .env
+            - echo "API_DOMAIN=$API_DOMAIN" >> .env
+            - echo "API_DOMAIN_CERT_ARN=$API_DOMAIN_CERT_ARN" >> .env
             # Push to ECR
             - pipe: atlassian/aws-ecr-push-image:1.5.0
               variables:
@@ -432,10 +486,9 @@ pipelines:
             - docker
           script:
             - echo "Deploying to stage staging"
-            # Restore variable IMAGE_URI
+            # Restore env variables
             - source .env
             # Execute deploy
-            - echo "Deploying image:" $IMAGE_URI
             - npm run deploy:staging
 
 
@@ -449,6 +502,7 @@ pipelines:
             - npm run build
           caches:
             - node
+
 
 ```
 
