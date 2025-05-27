@@ -1,4 +1,4 @@
-[![SpaceDev](./assets//img//SpaceDev%20logo.svg)](https://www.spacedev.io/)
+![SpaceDev](./assets//img//space-dev-logo.svg)
 
 ## React Guidelines
 
