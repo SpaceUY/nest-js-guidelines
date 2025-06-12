@@ -36,7 +36,11 @@ If you're using other tools, you can use the guide document but make some modifi
   test.admin.projectname.com
   test.app.projectname.com
 
-  If the client already owns a domain, check where it's hosted. If it's hosted in [AWS Route 53](https://aws.amazon.com/route53/), continue with the process. If it's not in Route 53, it's recommended to configure it in Route 53 to gain access to the domain's DNS. To do this, you'll need to contact the client and ask them to add a list of nameservers in the provider where the domain is currently hosted.
+  If the client already owns a domain, it's important to verify where it is registered. If the domain is managed in [AWS Route 53](https://aws.amazon.com/route53/), it is recommended to continue the process directly in Route 53.
+
+  If the domain is not hosted in Route 53, it is recommended to configure its DNS management in Route 53 to have centralized control from AWS. To do this, you will need to ask the client to update their current domain provider with the nameservers provided by Route 53.
+
+  Note: Hosting the domain in Route 53 is recommended but not mandatory. AWS allows you to generate SSL certificates for domains managed externally. In that case, you only need to create an "A" record in the current DNS provider pointing to the Load Balancer.
 
   Make sure to have an approved SSL certificate in [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) associated with the declared domains.
 
