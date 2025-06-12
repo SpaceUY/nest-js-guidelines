@@ -1,6 +1,6 @@
 ![SpaceDev](./assets//img//space-dev-logo.svg)
 
-## React Guidelines
+## Backend Guidelines
 
 ### Website **[here](https://spaceuy.github.io/nest-js-guidelines/)**
 
