@@ -14,6 +14,7 @@ We provide a [NestJS Template](https://github.com/SpaceUY/NestJS-Template) as a 
 If you need to start a backend with NestJS from scratch:
 
 1. **Create a new project:**
+   - Before starting the setup, make sure you are using the latest LTS version of Node.js.
    - Use the official NestJS CLI commands to initialize a new project. Follow the [NestJS first steps guide](https://docs.nestjs.com/first-steps?utm_source=chatgpt.com) for detailed instructions.
 2. **Reference the official template and guidelines:**
    - Use the [NestJS Template](https://github.com/SpaceUY/NestJS-Template) and your team's guidelines to organize your folders and structure your codebase. For more details, see the [Project Structure section](../architecture/2_project-structure.md).
