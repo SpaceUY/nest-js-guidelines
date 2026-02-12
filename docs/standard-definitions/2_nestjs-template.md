@@ -37,7 +37,7 @@ The adapter pattern ensures a consistent interface for each module, making it ea
 
 The template is currently being updated to align with the latest company standards. We encourage contributions! To participate, join the NestJS chapter calls to suggest new implementations or to take ownership of a feature you would like to add.
 
-> **Note:** Before using the template to start a new project, please ensure it is up to date with the latest versions, standards and features.
+> **If you have developed or are planning to develop a new integration for an external API or tool and would like to contribute it, please ensure you apply the Adapter Pattern so your implementation can be added to the template and reused by others.**
 
 **Coming soon:**
 - Auth0 integration (In Pull Request)
