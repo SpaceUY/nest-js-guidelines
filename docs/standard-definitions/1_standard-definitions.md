@@ -1,3 +1,10 @@
+---
+title: Standard technology definitions
+parent: Company’s Standard Technology Definitions
+layout: default
+nav_order: 1
+---
+
 # Company’s standard technology definitions
 
 The following standards have been defined at the company level through chapter meetings, based on analyses and discussions presented by the team. These standards serve as the default technologies and tools for our projects, but may vary depending on specific project or client requirements.

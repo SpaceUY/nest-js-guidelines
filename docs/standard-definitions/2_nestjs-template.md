@@ -1,3 +1,10 @@
+---
+title: NestJS Template
+parent: Company’s Standard Technology Definitions
+layout: default
+nav_order: 2
+---
+
 # NestJS Template
 
 We provide a [NestJS Template](https://github.com/SpaceUY/NestJS-Template) as a starting point for backend projects. The main goal of this template is to offer a development guide and pre-built implementations of common features used across multiple projects. By leveraging the [planetary tool](https://github.com/SpaceUY/planetary), these implementations can be easily exported and integrated into new backend projects.
