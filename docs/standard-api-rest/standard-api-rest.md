@@ -35,19 +35,19 @@ Additionally avoid verb-noun combinations: hyphenated, snake_case, camelCase.
 **Bad examples:**
 
 ```
-http://api.example.com/v1/store/CreateItems/{item-id}     ❌
-http://api.example.com/v1/store/getEmployees/{emp-id}     ❌
-http://api.example.com/v1/store/update-prices/{price-id}  ❌
-http://api.example.com/v1/store/deleteOrders/{order-id}   ❌
+http://api.example.com/v1/CreateItems/{item-id}     ❌
+http://api.example.com/v1/getEmployees/{emp-id}     ❌
+http://api.example.com/v1/update-prices/{price-id}  ❌
+http://api.example.com/v1/deleteOrders/{order-id}   ❌
 ```
 
 **Good examples:**
 
 ```
-POST   http://api.example.com/v1/store/items/{item-id}      ✅
-GET    http://api.example.com/v1/store/employees/{emp-id}   ✅
-PATCH  http://api.example.com/v1/store/prices/{price-id}    ✅
-DELETE http://api.example.com/v1/store/orders/{order-id}    ✅
+POST   http://api.example.com/v1/items/{item-id}      ✅
+GET    http://api.example.com/v1/employees/{emp-id}   ✅
+PATCH  http://api.example.com/v1/prices/{price-id}    ✅
+DELETE http://api.example.com/v1/orders/{order-id}    ✅
 ```
 
 ### Use Pluralized Nouns for resources
@@ -57,15 +57,15 @@ Use plural when possible unless they are singleton resources.
 **Bad examples:**
 
 ```
-http://api.example.com/v1/store/item/{item-id}              ❌
-http://api.example.com/v1/store/employee/{emp-id}/address   ❌
+http://api.example.com/v1/item/{item-id}              ❌
+http://api.example.com/v1/employee/{emp-id}/address   ❌
 ```
 
 **Good examples:**
 
 ```
-http://api.example.com/v1/store/items/{item-id}             ✅
-http://api.example.com/v1/store/employees/{emp-id}/address  ✅
+http://api.example.com/v1/items/{item-id}             ✅
+http://api.example.com/v1/employees/{emp-id}/address  ✅
 ```
 
 Use the plural form whenever applicable, except when referring to unique or singular resources.
@@ -77,17 +77,17 @@ Avoid using underscores. Separating words with hyphens will make it easier for b
 **Bad examples:**
 
 ```
-http://api.example.com/v1/store/teammember/{team-id}                        ❌
-http://api.example.com/v1/store/itemmanagement/{item-id}/producttype        ❌
-http://api.example.com/v1/store/inventory_items                             ❌
+http://api.example.com/v1/teammembers/{team-id}                       ❌
+http://api.example.com/v1/itemmanagement/{item-id}/producttype        ❌
+http://api.example.com/v1/inventory_items                             ❌
 ```
 
 **Good examples:**
 
 ```
-http://api.example.com/v1/store/team-member/{team-id}                       ✅
-http://api.example.com/v1/store/items/{item-id}/product-types               ✅
-http://api.example.com/v1/store/inventory-items                             ✅
+http://api.example.com/v1/team-members/{team-id}                      ✅
+http://api.example.com/v1/items/{item-id}/product-types               ✅
+http://api.example.com/v1/inventory-items                             ✅
 ```
 
 ---
@@ -99,8 +99,8 @@ http://api.example.com/v1/store/inventory-items                             ✅
 It's common to encounter the need to sort, filter, or limit a collection of resources based on specific attributes. Instead of creating additional APIs for each requirement, enhance your resource collection API to support sorting, filtering, and pagination. Use query parameters to pass the necessary input values to meet these needs efficiently.
 
 ```
-http://api.example.com/v1/store/items?group=124                         ✅
-http://api.example.com/v1/store/employees?department=IT&region=USA      ✅
+http://api.example.com/v1/items?group=124                         ✅
+http://api.example.com/v1/employees?department=IT&region=USA      ✅
 ```
 
 ### Path parameters
@@ -108,8 +108,8 @@ http://api.example.com/v1/store/employees?department=IT&region=USA      ✅
 Use path parameters when you need to identify a specific resource or resource hierarchy. Path parameters represent a unique ID or key that is essential to locating the exact resource in your data structure.
 
 ```
-http://api.example.com/v1/store/users/124              ✅
-http://api.example.com/v1/store/users/124/orders/234   ✅
+http://api.example.com/v1/users/124              ✅
+http://api.example.com/v1/users/124/orders/234   ✅
 ```
 
 **Bad examples:**
@@ -226,14 +226,14 @@ APIs should be versioned to maintain backward compatibility.
 Always try to version your APIs. Versioning allows you to offer an upgrade path without altering the core functionality of the existing APIs. It also lets users know that newer versions of the API are available at the specified fully-qualified URIs.
 
 ```
-http://api.example.com/v1/store/employees/{emp-id}   ✅
+http://api.example.com/v1/employees/{emp-id}   ✅
 ```
 
 Introducing major breaking changes can be avoided by using a versioning scheme like `/v2`.
 
 ```
-http://api.example.com/v1/store/items/{item-id}                 ✅
-http://api.example.com/v2/store/employees/{emp-id}/address      ✅
+http://api.example.com/v1/items/{item-id}                 ✅
+http://api.example.com/v2/employees/{emp-id}/address      ✅
 ```
 
 ---
