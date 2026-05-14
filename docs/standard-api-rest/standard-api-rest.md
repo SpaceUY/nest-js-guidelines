@@ -202,23 +202,18 @@ The `/me` route is used for:
 
 - **Self-Reference:** Allowing the authenticated user to access their own data without needing their user ID in the URL.
 
+  ```
+  GET /users/12345   ❌  (requires the client to know their own ID)
+
+  GET /users/me      ✅
+  PATCH /users/me    ✅  (update own profile)
+  ```
+
 - **User-Specific Actions:** Performing actions relevant to the authenticated user, such as updating profile details or retrieving personal settings.
 
   ```
   GET /users/me/orders   ✅
   ```
-
----
-
-## Authorization Token Handling
-
-All APIs must use the `Authorization` header with the Bearer scheme to transmit authentication tokens. Use this format in every request that requires authentication:
-
-```
-Authorization: Bearer <token>
-```
-
-`Bearer` is the authorization scheme type, followed by the token (typically a JWT). This approach keeps the API stateless, works seamlessly across web and mobile clients, and gives full control over token expiration and refresh logic.
 
 ---
 
@@ -243,11 +238,37 @@ http://api.example.com/v2/store/employees/{emp-id}/address      ✅
 
 ---
 
-## Other REST API best practices
+## Additional Considerations
 
 ### HTTP Status Codes and Error Handling
 
 HTTP status codes in a REST API provide information about the outcome of an API request. They help indicate whether the request was successful, whether there was an error, or whether additional action is required. Effective error handling and using the correct status codes can make APIs more predictable, helping users understand responses.
+
+#### 2xx — Success
+
+| Code | Name | When to use |
+|------|------|-------------|
+| `200` | OK | Successful `GET`, `PUT`, or `PATCH` request |
+| `201` | Created | Successful `POST` that created a new resource |
+| `204` | No Content | Successful `DELETE` or action with no response body |
+
+#### 4xx — Client Errors
+
+| Code | Name | When to use |
+|------|------|-------------|
+| `400` | Bad Request | Malformed request, invalid syntax, or failed validation |
+| `401` | Unauthorized | Missing or invalid authentication token |
+| `403` | Forbidden | Authenticated but not authorized to access the resource |
+| `404` | Not Found | Resource does not exist |
+| `409` | Conflict | State conflict (e.g., duplicate entry, version mismatch) |
+| `422` | Unprocessable Entity | Request is well-formed but fails business rule validation |
+
+#### 5xx — Server Errors
+
+| Code | Name | When to use |
+|------|------|-------------|
+| `500` | Internal Server Error | Unexpected server-side failure |
+| `503` | Service Unavailable | Server temporarily unable to handle the request |
 
 ### Caching
 
@@ -261,6 +282,16 @@ Utilize HTTP caching mechanisms (e.g., `ETag`, `Cache-Control`) to improve perfo
 - Implement authentication (e.g., OAuth, JWT) and authorization to secure API endpoints.
 - Validate and sanitize all inputs to prevent security vulnerabilities.
 
+### Authorization Token Handling
+
+All APIs must use the `Authorization` header with the Bearer scheme to transmit authentication tokens. Use this format in every request that requires authentication:
+
+```
+Authorization: Bearer <token>
+```
+
+`Bearer` is the authorization scheme type, followed by the token (typically a JWT). This approach keeps the API stateless, works seamlessly across web and mobile clients, and gives full control over token expiration and refresh logic.
+
 ---
 
 ## Conclusion
@@ -271,11 +302,9 @@ In conclusion, implementing these REST API best practices ensures that the team 
 
 ## Sources and interest links
 
-- [NestJS CRUD Generator](https://docs.nestjs.com/recipes/crud-generator)
 - [Swagger OpenAPI Specification](https://swagger.io/specification/)
 - [OpenAPI Latest Specification](https://spec.openapis.org/oas/latest.html#openapi-object)
 - [NestJS Router Module](https://docs.nestjs.com/recipes/router-module)
 - [Azure REST API Design](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
 - [Azure REST API Implementation](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-implementation)
 - [JSON:API - Updating Relationships](https://jsonapi.org/format/#crud-updating-relationships)
-- [NestJS Caching](https://docs.nestjs.com/techniques/caching#auto-caching-responses)
