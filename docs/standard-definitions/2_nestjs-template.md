@@ -32,7 +32,7 @@ The template makes use of the Adapter Pattern to provide flexibility and extensi
 The adapter pattern ensures a consistent interface for each module, making it easy to use and extend integrations as needed across different projects.
 
 **Available adaptable modules:**
-- **Email:** Includes integration with SendGrid. [email module](https://github.com/SpaceUY/NestJS-Template/pull/14)
+- **Email:** Includes integration with SendGrid, Resend, and AWS SES. [email module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/email)
 - **Cloud Storage:** Includes integration with S3 ([cloud-storage module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/cloud-storage)).
 - **Push Notifications:** Includes integration with Expo ([push-notification module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/push-notification)).
 - **Config Provider:** Provider-agnostic, typed configuration for environment variables and secrets (env vars or AWS Secrets Manager) ([config-provider module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/config-provider)).
@@ -44,6 +44,3 @@ The adapter pattern ensures a consistent interface for each module, making it ea
 The template is currently being updated to align with the latest company standards. We encourage contributions! To participate, join the NestJS chapter calls to suggest new implementations or to take ownership of a feature you would like to add.
 
 > **If you have developed or are planning to develop a new integration for an external API or tool and would like to contribute it, please ensure you apply the Adapter Pattern so your implementation can be added to the template and reused by others.**
-
-**Coming soon:**
-- Resend and AWS SES integration for emails (In Pull Request)
