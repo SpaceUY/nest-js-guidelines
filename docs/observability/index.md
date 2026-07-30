@@ -8,9 +8,9 @@ nav_order: 3
 
 This section covers how to make a NestJS backend observable: infrastructure/application monitoring via **Grafana**, product analytics via **PostHog**, and how to instrument a NestJS service with **OpenTelemetry** so both are fed correctly. Infrastructure provisioning on AWS (how the observability backend is actually deployed) is covered in the [DevOps Guidelines](https://github.com/SpaceUY/devops-guidelines) — this section is the application-level standard.
 
-1. [Observability backend: Grafana](./1_observability-backend.md)
-2. [Product analytics: PostHog](./2_product-analytics.md)
-3. [Telemetry: OpenTelemetry instrumentation in NestJS](./3_telemetry.md)
+1. [Observability backend: Grafana](./1_observability-backend.html)
+2. [Product analytics: PostHog](./2_product-analytics.html)
+3. [Telemetry: OpenTelemetry instrumentation in NestJS](./3_telemetry.html)
 
 ## Recommended stack
 

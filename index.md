@@ -4,11 +4,11 @@ layout: default
 nav_order: 0
 ---
 
-# Welcome to the Nest JS Code Guidelines!
+# Welcome to the Backend Guidelines!
 
 Hey Team!
 
-Welcome to our Nest JS Code Guidelines! 🎉
+Welcome to our Backend Guidelines! 🎉
 
 ![Developers](https://i.imgflip.com/8tqpny.jpg)
 
@@ -25,7 +25,7 @@ Great question! Consistency is key to our success. By following these guidelines
 
 ## Getting Started: Start With Company Standards
 
-If you're about to create a new backend, your first stop should be the [Standards section](docs/standard-definitions/1_standard-definitions.md). Here you'll find the default technologies, tools, and best practices defined by the company. Reading this first will help you set up your project correctly from the start.
+If you're about to create a new backend, your first stop should be the [Standards section](docs/standard-definitions/1_standard-definitions.html). Here you'll find the default technologies, tools, and best practices defined by the company. Reading this first will help you set up your project correctly from the start.
 
 ## What You'll Find Here
 

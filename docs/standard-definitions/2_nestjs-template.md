@@ -17,7 +17,7 @@ If you need to start a backend with NestJS from scratch:
    - Before starting the setup, make sure you are using the latest LTS version of Node.js.
    - Use the official NestJS CLI commands to initialize a new project. Follow the [NestJS first steps guide](https://docs.nestjs.com/first-steps?utm_source=chatgpt.com) for detailed instructions.
 2. **Reference the official template and guidelines:**
-   - Use the [NestJS Template](https://github.com/SpaceUY/NestJS-Template) and your team's guidelines to organize your folders and structure your codebase. For more details, see the [Project Structure section](../architecture/2_project-structure.md).
+   - Use the [NestJS Template](https://github.com/SpaceUY/NestJS-Template) and your team's guidelines to organize your folders and structure your codebase. For more details, see the [Project Structure section](../architecture/2_project-structure.html).
 3. **Copy adaptable modules from the template:**
    - Take only the folders or modules you need from the template. You can do this manually via copy/paste or by using the [planetary tool](https://github.com/SpaceUY/planetary) for an automated approach.
 4. **Enjoy developing on the dark side!**
@@ -35,12 +35,15 @@ The adapter pattern ensures a consistent interface for each module, making it ea
 - **Email:** Includes integration with SendGrid. [email module](https://github.com/SpaceUY/NestJS-Template/pull/14)
 - **Cloud Storage:** Includes integration with S3 ([cloud-storage module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/cloud-storage)).
 - **Push Notifications:** Includes integration with Expo ([push-notification module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/push-notification)).
+- **Config Provider:** Provider-agnostic, typed configuration for environment variables and secrets (env vars or AWS Secrets Manager) ([config-provider module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/config-provider)).
+- **Database:** Includes TypeORM integration with entities and migrations ([database module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/database)).
+- **Queues:** Background job processing ([queues module](https://github.com/SpaceUY/NestJS-Template/pull/28)).
+- **Auth0:** Authentication integration with Auth0 ([auth module](https://github.com/SpaceUY/NestJS-Template/pull/15)).
+- **Cache:** Includes integration with Redis (standalone, cluster, and AWS ElastiCache) ([cache module](https://github.com/SpaceUY/NestJS-Template/tree/master/src/cache)).
 
 The template is currently being updated to align with the latest company standards. We encourage contributions! To participate, join the NestJS chapter calls to suggest new implementations or to take ownership of a feature you would like to add.
 
 > **If you have developed or are planning to develop a new integration for an external API or tool and would like to contribute it, please ensure you apply the Adapter Pattern so your implementation can be added to the template and reused by others.**
 
 **Coming soon:**
-- Auth0 integration (In Pull Request)
-- TypeORM implementation
 - Resend and AWS SES integration for emails (In Pull Request)
