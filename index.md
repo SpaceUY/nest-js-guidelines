@@ -1,6 +1,7 @@
 ---
 title: Home
 layout: default
+nav_order: 0
 ---
 
 # Welcome to the Nest JS Code Guidelines!
@@ -36,6 +37,7 @@ Here's a sneak peek of what we cover:
 - **Common Pitfalls**: Mistakes to avoid and how to fix them.
 - **Useful Tools**: Recommended tools and libraries that make our lives easier.
 - **Notifications**: Implementing push notifications with Firebase Cloud Messaging from the backend.
+- **Observability**: Our recommended stack (Grafana Cloud + PostHog + OpenTelemetry) and how to instrument a NestJS service with OpenTelemetry.
 
 ## Let's Make It Happen!
 
