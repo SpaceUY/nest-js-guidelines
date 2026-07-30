@@ -14,6 +14,7 @@ The following standards have been defined at the company level through chapter m
 - **Non-Relational ORM:** [Mongoose](https://mongoosejs.com/) is the preferred choice for working with non-relational (NoSQL) databases.
 - **Backend Framework:** [NestJS](https://nestjs.com/) is our standard backend framework for building scalable server-side applications.
 - **Infrastructure:** [AWS](https://aws.amazon.com/) is our standard platform for cloud infrastructure and services. See the [DevOps Guidelines](https://github.com/SpaceUY/devops-guidelines) for deployment and infrastructure documentation.
+- **Observability:** [Grafana](https://grafana.com/) (self-hosted or Grafana Cloud) for infrastructure/application monitoring, [PostHog](https://posthog.com/) for product analytics, and [OpenTelemetry](https://opentelemetry.io/) for instrumenting the backend. See the [Observability section](../observability/index.md) for the full standard.
 - **Chapter Board:** We use the [ClickUp chapter NestJS board](https://app.clickup.com/3117051/v/o/s/90142470417) to manage and track chapter-related activities and standards.
 - **Authentication:** [Auth0](https://auth0.com/) is the standard solution for authentication and authorization.
 - **Repository Hosting:** [Bitbucket](https://bitbucket.org/) is our standard platform for hosting code repositories.

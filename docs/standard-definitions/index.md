@@ -1,7 +1,7 @@
 ---
 title: Company’s Standard Technology Definitions
 layout: default
-nav_order: 1
+nav_order: 0.5
 ---
 
 # Company’s standard technology definitions
