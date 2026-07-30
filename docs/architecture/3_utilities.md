@@ -53,7 +53,7 @@ If the answer to any of these questions is "yes", it probably belongs in common.
 
 Enums are an important part of any application. They are the natural (but labelled) extension of boolean values. They are typically used to describe possible _states_ of variables.
 
-There are, in general, two types of enums to consider: module-specific enums, which should go in the respective module (as outlined [here](./2_project-structure.md)), and global enums, used throughout the project. These should live under `./common/enums`.
+There are, in general, two types of enums to consider: module-specific enums, which should go in the respective module (as outlined [here](./2_project-structure.html)), and global enums, used throughout the project. These should live under `./common/enums`.
 
 Enum files should use the `.enum.ts` extension.
 

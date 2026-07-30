@@ -1,5 +1,5 @@
 ---
-title: Product analytics: PostHog
+title: "Product analytics: PostHog"
 parent: Observability
 layout: default
 nav_order: 2
@@ -17,7 +17,7 @@ PostHog doesn't compete with Grafana — it competes with Amplitude, Mixpanel, S
 
 ## Implementation in the NestJS Template
 
-The [NestJS Template](https://github.com/SpaceUY/NestJS-Template) implements this as an abstract analytics module under `common/observability/analytics`, following the same [Adapter Pattern](../standard-definitions/2_nestjs-template.md) used for Email, Cloud Storage, and Push Notifications: a common abstract class defines the analytics interface, and provider-specific subclasses implement it.
+The [NestJS Template](https://github.com/SpaceUY/NestJS-Template) implements this as an abstract analytics module under `common/observability/analytics`, following the same [Adapter Pattern](../standard-definitions/2_nestjs-template.html) used for Email, Cloud Storage, and Push Notifications: a common abstract class defines the analytics interface, and provider-specific subclasses implement it.
 
 - **`PostHogAdapterService`** — the real adapter, backed by `posthog-node`, sends events to PostHog.
 - **`ConsoleAdapterService`** — logs events to the console instead of sending them anywhere. Used for local development and initial testing without needing a PostHog project configured.

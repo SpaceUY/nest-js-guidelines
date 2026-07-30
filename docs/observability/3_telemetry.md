@@ -7,7 +7,7 @@ nav_order: 3
 
 # Telemetry: OpenTelemetry instrumentation in NestJS
 
-This is the practical, code-level piece of the observability standard: how to think about tracing with [OpenTelemetry](https://opentelemetry.io/) in a NestJS service, independent of which backend ([Grafana](./1_observability-backend.md), SigNoz, Datadog, etc.) ends up reading the data. It has already been implemented and validated in the [NestJS Template](https://github.com/SpaceUY/NestJS-Template), under `common/observability/telemetry`.
+This is the practical, code-level piece of the observability standard: how to think about tracing with [OpenTelemetry](https://opentelemetry.io/) in a NestJS service, independent of which backend ([Grafana](./1_observability-backend.html), SigNoz, Datadog, etc.) ends up reading the data. It has already been implemented and validated in the [NestJS Template](https://github.com/SpaceUY/NestJS-Template), under `common/observability/telemetry`.
 
 ## The goal: instrument once, not again for the next incident
 
@@ -128,7 +128,7 @@ To start: export everything during the initial rollout, introduce sampling once 
 
 ## Choosing a backend
 
-The OTel SDK is vendor-neutral (OTLP exporter) — instrumentation code only ever talks to `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_HEADERS`, never to a specific vendor's SDK. That's the practical payoff of standardizing on OpenTelemetry: which backend to use is a separate, genuinely reversible decision — see [Observability backend](./1_observability-backend.md) for how we choose and set it up (self-hosted Grafana vs. Grafana Cloud). If that choice changes later, moving to it is a config change (updating the endpoint and headers), not a rewrite of the instrumentation.
+The OTel SDK is vendor-neutral (OTLP exporter) — instrumentation code only ever talks to `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_HEADERS`, never to a specific vendor's SDK. That's the practical payoff of standardizing on OpenTelemetry: which backend to use is a separate, genuinely reversible decision — see [Observability backend](./1_observability-backend.html) for how we choose and set it up (self-hosted Grafana vs. Grafana Cloud). If that choice changes later, moving to it is a config change (updating the endpoint and headers), not a rewrite of the instrumentation.
 
 To start locally: [Jaeger](https://www.jaegertracing.io/) (`jaegertracing/all-in-one`) added to `docker-compose.yml` — UI on `:16686`, OTLP HTTP on `:4318`. Moving from local Jaeger to the chosen backend later doesn't touch a line of instrumentation code — only the collector's destination changes.
 

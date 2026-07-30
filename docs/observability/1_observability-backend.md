@@ -1,5 +1,5 @@
 ---
-title: Observability backend: Grafana
+title: "Observability backend: Grafana"
 parent: Observability
 layout: default
 nav_order: 1
@@ -31,4 +31,4 @@ Both are valid options — which one to use is a decision to make with the clien
 
 Grafana Cloud accepts OTLP directly from the app, with no Alloy collector in the middle — the first step into the hybrid model can be just changing two environment variables (endpoint + auth token), with zero new infrastructure. Alloy is the recommended path for production at real scale, but it isn't a requirement to get started.
 
-Whichever option is used, it doesn't change a line of application code: the app is instrumented with OpenTelemetry the same way in both cases, and only the collector's destination changes — see [Choosing a backend](./3_telemetry.md#choosing-a-backend) in the telemetry guide.
+Whichever option is used, it doesn't change a line of application code: the app is instrumented with OpenTelemetry the same way in both cases, and only the collector's destination changes — see [Choosing a backend](./3_telemetry.html#choosing-a-backend) in the telemetry guide.
