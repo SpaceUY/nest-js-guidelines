@@ -1,13 +1,14 @@
 ---
 title: Home
 layout: default
+nav_order: 0
 ---
 
-# Welcome to the Nest JS Code Guidelines!
+# Welcome to the Backend Guidelines!
 
 Hey Team!
 
-Welcome to our Nest JS Code Guidelines! 🎉
+Welcome to our Backend Guidelines! 🎉
 
 ![Developers](https://i.imgflip.com/8tqpny.jpg)
 
@@ -21,3 +22,25 @@ Great question! Consistency is key to our success. By following these guidelines
 - **Maintain Quality**: Clean code is easier to debug, test, and maintain. This means fewer bugs and faster development!
 - **Onboard Quickly**: New team members can get up to speed faster if our codebase is consistent and well-documented.
 - **Enjoy the Process**: Let's face it, writing and reading clean code is just more fun!
+
+## Getting Started: Start With Company Standards
+
+If you're about to create a new backend, your first stop should be the [Standards section](docs/standard-definitions/1_standard-definitions.html). Here you'll find the default technologies, tools, and best practices defined by the company. Reading this first will help you set up your project correctly from the start.
+
+## What You'll Find Here
+
+Here's a sneak peek of what we cover:
+
+- **Code Structure**: How to organize files and folders in our projects.
+- **Styling**: Our rules for writing clean and readable code, including naming conventions and formatting.
+- **Best Practices**: Tips and tricks for writing efficient and maintainable code.
+- **Common Pitfalls**: Mistakes to avoid and how to fix them.
+- **Useful Tools**: Recommended tools and libraries that make our lives easier.
+- **Notifications**: Implementing push notifications with Firebase Cloud Messaging from the backend.
+- **Observability**: Our recommended stack (Grafana Cloud + PostHog + OpenTelemetry) and how to instrument a NestJS service with OpenTelemetry.
+
+## Let's Make It Happen!
+
+Remember, these guidelines are here to help us, not to restrict us. Feel free to suggest improvements or ask questions anytime. Let's work together to keep our codebase clean, efficient, and fun to work with.
+
+Happy coding! 🚀

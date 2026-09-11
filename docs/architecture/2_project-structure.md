@@ -80,6 +80,12 @@ It's useful to add `index.ts` files as well in each of these subfolders.
 
 Modules should be as self-contained as possible, so if there are other elements around them - helpers, constants, etc. -, consider including them here as well. This goes for both this approach, and the one following below.
 
+### About controllers
+
+We often think of controllers in terms of standard the REST API structure. However, this is not the only presentation we could go with.
+
+Different paradigms might be used, such as GraphQL, JSON RPC, gRPC, etc. When this happens, we recommend creating subfolders inside `/controllers`, one for each presentation type.
+
 ---
 
 ## Structure for complex projects
@@ -88,7 +94,7 @@ More complex projects may see parts of their infrastructure or their presentatio
 
 So, we take elements of [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design) (DDD) and the [Hexagonal Architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>) to propose this folder structure.
 
-> 💡 It's very useful to read about [abstract interfaces](./abstract-interfaces.html) in order to make the most out of this design choice.
+> 💡 It's very useful to read about [abstract interfaces](./1_abstract-interfaces.html) in order to make the most out of this design choice.
 
 Instead of being a simple container, each module is now separated into three very distinct parts:
 
@@ -166,20 +172,19 @@ The standard structure for the domain layer looks like this:
 ```
 purchases
 └───domain
-|   └─── events.ts
-|   └─── constants.ts
-|   └───enums
-|   └───exceptions
-└───models
-|   └───purchase.model.ts
-|   └───receipt.model.ts
-└───services
-|   └───purchase.service.ts
-|   └───receipt.service.ts
-└───interfaces
-|   └───persistence
-|   └───messaging
-└───...
+    └─── events.ts
+    └─── constants.ts
+    └───enums
+    └───exceptions
+    └─── models
+    |    └───purchase.model.ts
+    |    └───receipt.model.ts
+    └───services
+    |    └───purchase.service.ts
+    |    └───receipt.service.ts
+    └───interfaces
+         └───persistence
+         └───messaging
 ```
 
 #### Models vs Entities
@@ -237,7 +242,7 @@ Under infrastructure, we find external providers that serve purposes such as per
 
 > 💡 This is the main idea and benefit behind [hexagonal architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>).
 
-The bottom line is that data models for external providers, as well as services that interface with them live here. But the use of [adapters](./abstract-interfaces.html) is also encouraged, so that external providers and wrapping libraries can be switched and updated as the application evolves, without the need to rewrite business logic.
+The bottom line is that data models for external providers, as well as services that interface with them live here. But the use of [adapters](./1_abstract-interfaces.html) is also encouraged, so that external providers and wrapping libraries can be switched and updated as the application evolves, without the need to rewrite business logic.
 
 Thus, the standard folder structure will look like this:
 
@@ -261,6 +266,12 @@ purchases
 ```
 
 > 👉 It should be noted that under normal circumstances, only one adapter will be used at a given time. But it's generally a good practice not to discard other adapters. Other situations may call for multiple adapters (i.e. writing to multiple blockchains).
+
+#### About mappers
+
+Some of these elements will naturally require a mechanism to convert from and to domain elements. One particularly clear example is when we have a domain model, that needs to be mapped to persistence, or viceversa.
+
+For this reason, **mappers** are tightly associated with particular adapters. These are providers that essentially implementa two methods: one to map _to_ the infrastructure layer, and one to map _from_ it. They should live on each adapter's folder.
 
 ---
 
