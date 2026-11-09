@@ -10,7 +10,7 @@ Hey Team!
 
 Welcome to our Backend Guidelines! 🎉
 
-![Developers](https://i.imgflip.com/8tqpny.jpg)
+![Developers](assets/img/yoda-backend-master.jpg)
 
 Here, you'll find everything you need to know about writing clean, efficient, and maintainable code for our projects. Whether you're a seasoned developer or just getting started, these guidelines will help us all stay on the same page and produce top-notch code.
 
