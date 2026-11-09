@@ -13,6 +13,7 @@ The following standards have been defined at the company level through chapter m
 - **Relational ORM:** [TypeORM](https://typeorm.io/) is used for relational database management.
 - **Non-Relational ORM:** [Mongoose](https://mongoosejs.com/) is the preferred choice for working with non-relational (NoSQL) databases.
 - **Backend Framework:** [NestJS](https://nestjs.com/) is our standard backend framework for building scalable server-side applications.
+- **Package Manager:** [pnpm](https://pnpm.io/) is our standard package manager.
 - **HTTP Adapter:** The NestJS [`NodeAdapter`](https://docs.nestjs.com/http/performance) (`@nestjs/platform-node`) is our default HTTP adapter. Express is no longer the default. See [HTTP adapter](#http-adapter) below.
 - **Infrastructure:** [AWS](https://aws.amazon.com/) is our standard platform for cloud infrastructure and services. See the [DevOps Guidelines](https://github.com/SpaceUY/devops-guidelines) for deployment and infrastructure documentation.
 - **Observability:** [Grafana](https://grafana.com/) (self-hosted or Grafana Cloud) for infrastructure/application monitoring, [PostHog](https://posthog.com/) for product analytics, and [OpenTelemetry](https://opentelemetry.io/) for instrumenting the backend. See the [Observability section](../observability/index.html) for the full standard.
